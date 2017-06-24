@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -246,9 +245,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
   public void videoChatCallingFrom(Establishment establishment){
 
-    Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-    Ringtone ringtone = RingtoneManager.getRingtone(this, alarmUri);
-    ringtone.play();
     Intent intent1 = new Intent(this, CommActivity.class);
     intent1.putExtra("establishmentId", establishment.getId().toString());
     startActivityForResult(intent1, 1);
@@ -385,8 +381,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 DatabaseReference dbNoticeValue = dbHolbox.getReference(getEstablishmentName());
                 Establishment establishment= AppData.getMyInstance().getEstablishment();
                 Log.d("onClick",getEstablishmentName()+ "<-"+establishment);
+                establishment.setNotice(Constants.ANY);
                 dbNoticeValue.setValue(establishment);
-                establishment.setNotice(Constants.ADMIN_PHONE);
+
               }else {
                 FirebaseDatabase dbHolbox = FirebaseDatabase.getInstance();
                 DatabaseReference dbNoticeValue = dbHolbox.getReference(getEstablishmentName());

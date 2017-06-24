@@ -8,9 +8,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.baires.holboxclient.common.AppData;
+import com.baires.holboxclient.common.Constants;
+import com.baires.holboxclient.model.Establishment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class CommActivity extends AppCompatActivity  {
 
@@ -20,8 +29,36 @@ public class CommActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comm);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+      FirebaseDatabase dbHolbox = FirebaseDatabase.getInstance();
+      String establishmentId = getIntent().getStringExtra("establishmentId");
+      DatabaseReference dbNoticeValue = dbHolbox.getReference(Constants.ESTABLISHMENT+establishmentId);
+      Log.d("onPostCreate", Constants.ESTABLISHMENT+establishmentId);
+      ValueEventListener onChangeMe = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+          Establishment establishment = dataSnapshot.getValue(Establishment.class);
+          //Update this establishment in memory
+          AppData.getMyInstance().setEstablishment(establishment);
+          String notice = establishment.getNotice();
+          Log.d("onPostCreate", establishment.toString());
+          if (Constants.ANY.equals(notice)) { //Cancel call
+            if (mp != null && mp.isPlaying()) {
+              mp.stop();
+            }
+            String establishmentId = getIntent().getStringExtra("establishmentId");
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("establishmentId", establishmentId);
+            setResult(Activity.RESULT_CANCELED, returnIntent);
+            finish();
+          }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+          Log.e(Constants.ERROR, databaseError.getMessage());
+        }
+      };
+      dbNoticeValue.addValueEventListener(onChangeMe);
 
        Button answercall = (Button) findViewById(R.id.answercall);
       answercall.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +94,8 @@ public class CommActivity extends AppCompatActivity  {
   @Override
   protected void onPostCreate(@Nullable Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
-    //Sound ringtone
+
+      //Sound ringtone
     Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
     mp = MediaPlayer.create(getApplicationContext(), notification);
     mp.start();
