@@ -26,18 +26,18 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
 
-    <ImageButton
-        android:id="@+id/comm_button"
-        android:src="@drawable/operator"
-        android:background="@null"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="fitXY"
-        android:layout_alignTop="@+id/alarm_button"
-        android:layout_toRightOf="@+id/alarm_button"
-        android:layout_toEndOf="@+id/alarm_button"
-        android:layout_marginLeft="38dp"
-        android:layout_marginStart="38dp" />
+  <ImageButton
+    android:id="@+id/comm_button"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:layout_alignTop="@+id/alarm_button"
+    android:layout_marginLeft="38dp"
+    android:layout_marginStart="38dp"
+    android:layout_toEndOf="@+id/alarm_button"
+    android:layout_toRightOf="@+id/alarm_button"
+    android:background="@null"
+    android:scaleType="fitXY"
+    android:src="@drawable/operator"/>
 
     <ImageButton
         android:id="@+id/alarm_button"
