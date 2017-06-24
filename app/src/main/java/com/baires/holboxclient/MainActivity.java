@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -372,19 +373,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.comm_button:
 
               if(Constants.CALLING.equals(AppData.getMyInstance().getEstablishment().getNotice())){
-                if(mp!=null&&mp.isPlaying()) {
-                  mp.stop();
-                }
-                ImageView img= (ImageView) findViewById(R.id.comm_button);
-                img.setImageResource(R.drawable.operator);
-                FirebaseDatabase dbHolbox = FirebaseDatabase.getInstance();
-                DatabaseReference dbNoticeValue = dbHolbox.getReference(getEstablishmentName());
-                Establishment establishment= AppData.getMyInstance().getEstablishment();
-                Log.d("onClick",getEstablishmentName()+ "<-"+establishment);
-                establishment.setNotice(Constants.ANY);
-                dbNoticeValue.setValue(establishment);
+                cancelCall();
 
               }else {
+
+                CountDownTimer timerCountDown = new CountDownTimer(30000, 30000) {
+                  @Override
+                  public void onTick(long millisUntilFinished) {
+                  }
+                  @Override
+                  public void onFinish() {
+                    cancelCall();
+                  }
+                };
+                timerCountDown.start();
+
                 FirebaseDatabase dbHolbox = FirebaseDatabase.getInstance();
                 DatabaseReference dbNoticeValue = dbHolbox.getReference(getEstablishmentName());
                 Establishment establishment= AppData.getMyInstance().getEstablishment();
@@ -396,9 +399,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ImageView img= (ImageView) findViewById(R.id.comm_button);
                 img.setImageResource(R.drawable.operator_calling);
                 //Sound ringtone
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                mp = MediaPlayer.create(getApplicationContext(), notification);
-                mp.start();
+                try{
+                  Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                  mp = MediaPlayer.create(getApplicationContext(), notification);
+                  mp.setLooping(true);
+                  mp.start();
+                }catch(Exception ex){
+                  Log.e("onClick","Error playing ringtone."+ex.getMessage());
+                }
 
               }
 
@@ -412,6 +420,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
+  private void cancelCall() {
+    if(mp!=null&&mp.isPlaying()) {
+      mp.stop();
+    }
+    ImageView img= (ImageView) findViewById(R.id.comm_button);
+    img.setImageResource(R.drawable.operator);
+    FirebaseDatabase dbHolbox = FirebaseDatabase.getInstance();
+    DatabaseReference dbNoticeValue = dbHolbox.getReference(getEstablishmentName());
+    Establishment establishment= AppData.getMyInstance().getEstablishment();
+    Log.d("onClick",getEstablishmentName()+ "<-"+establishment);
+    establishment.setNotice(Constants.ANY);
+    dbNoticeValue.setValue(establishment);
+  }
+
   /**
    * A native method that is implemented by the 'native-lib' native library,
    * which is packaged with this application.
